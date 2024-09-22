@@ -1,0 +1,134 @@
+---
+title: "Assignment 2"
+author: "Abhinav Reddy"
+date: "2024-09-22"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***Weigelt Corporation***
+
+*Assigning Variables*
+
+Let,(PLANT 1)
+
+a_1(L)=No.of large units produced per day in Plant 1
+
+b_1(M)=No.of medium units produced per day
+
+c_1(S)=No.of small units produced per day
+
+
+***
+
+Let,(PLANT 2)
+
+a_2(L)=No.of large units produced per day in Plant 2.
+
+b_2(M)=No.of medium units produced per day.
+
+c_2(S)=No.of small units produced per day.
+
+***
+
+Let,(PLANT 3)
+
+a_3(L)=No.of large units produced per day in Plant 3.
+
+b_3(M)=No.of medium units produced per day.
+
+c_3(S)=No.of small units produced per day.
+
+*** 
+
+***Decision Variables***
+
+$$Decision Variables  = a_1(L), b_1(M),c_1(S),a_2(L),b_2(M),c_2(S),a_3(L),b_3(M),c_3(S)$$
+
+**Objective Function**
+$$Maximize \hspace{.2cm} P  = 420(a_1(L) + a_2(L) + a_3(L)) + 360 (b_1(M) + b_2(M) + b_3(M)) +300(c_1(S) + c_2(S) + c_3(S))$$
+**Subject to the constraints**
+$$Production Capacity \hspace{0.2cm} = a_1(L) + b_1(M) + c_1(S) \le 750$$
+
+$$\hspace{2cm}a_2(L) + b_2(M) + c_2(S) \le 900$$
+
+$$\hspace{2cm}a_3(L) + b_3(M) + c_3(S) \le 450$$
+
+$$Storage Space \hspace{0.2cm}   = 20a_1(L) + 15b_1(M)+12c_1(S)\le 13000$$
+
+$$\hspace{2cm}20a_2(L) + 15b_2(M)+12c_2(S)\le 12000$$
+
+
+$$\hspace{2cm}20a_3(L) + 15b_3(M)+12c_3(S)\le 5000$$
+$$Sales Forecast \hspace{0.2cm}   = a_1(L) + a_2(L)+a_3(L)\le 900   $$
+$$\hspace{2cm}b_1(M) + b_2(M)+b_3(M)\le 1200$$
+
+$$\hspace{2cm}c_1(S) + c_2(S)1+c_3(S)\le 750$$
+
+**Capacity Utilization**
+
+$$\hspace{2cm}((a_1(L) + b_1(M)+c_1(S))/750)=((a_2(L) + b_2(M)+c_2(S))/900) = ((a_3(L) + b_3(M)+c_3(S))/450)=\infty$$
+
+**Non Negativity**
+
+$$ \hspace{0.3cm}  a_1(L), b_1(M)c_1(S),a_2(L),b_2(M),c_2(S),a_3(L),b_3(M),c_3(S)\ge0 $$
+
+
+As for the objective function is to maximize P = 300c_1(S) + 300c_2(S) + 300c_3(S) + 360b_1(M) + 360b_2(M) + 360b_3(M) + 420a_1(L) + 420a_2(L) + 420a_3(L) (In Sequence for the Mathematical function)
+```{r}
+library(lpSolve)
+
+# Objective function
+objective.func <- c(300, 300, 300, 360, 360, 360, 420, 420, 420)
+
+# Constraints
+cstraints <- matrix(c(1, 0, 0, 1, 0, 0, 1, 0, 0,
+                   0, 1, 0, 0, 1, 0, 0, 1, 0,
+                   0, 0, 1, 0, 0, 1, 0, 0, 1,
+                   12, 0, 0, 15, 0, 0, 20, 0, 0,
+                   0, 12, 0, 0, 15, 0, 0, 20, 0,
+                   0, 0, 12, 0, 0, 15, 0, 0, 20,
+                   1, 1, 1, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 1, 1, 1, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 1, 1, 1,
+                   900, -750, 0, 900, -750, 0, 900, -750, 0,
+                   0, 450, -900, 0, 450, -900, 0, 450, -900,
+                   -450, 0, 750, -450, 0, 750, -450, 0, 750),
+                 ncol = 9, byrow = T)
+cstraints.dir <- c('<=', '<=', '<=', '<=', '<=', '<=', '<=', '<=', '<=',
+                '=', '=', '=')
+cstraints.rhs <- c(750, 900, 450, 13000, 12000, 5000, 750, 1200, 900, 0, 0, 0)
+
+# Solve LP
+prob.solLP <- lp('max', objective.func, cstraints, cstraints.dir, cstraints.rhs,
+               compute.sens = T)
+prob.solLP
+```
+
+
+#RESULT
+```{r}
+# LP solution
+prob.solLP$objval
+prob.solLP$solution
+```
+
+***Interpretation***
+
+## Maximum Profit
+
+The gross profit of 696,000$ represents the maximum profit possible for the new product, taking into account the performance of all the facilities involved in its production. This yield is determined under various constraints, such as the production capacity of each plant, available storage space, estimated sales and the need for equal utilization of production capacity in all plants. Thus, 696,000$ represents the best possible outcome under these constraints.
+
+## Plan for Production to maximize the Profit
+
+1.Plant 1 should produce Medium=178 Units & Large=516 Units
+
+2.Plant 2 should produce Small=167 units  & Medium=667 Units.
+
+3.Plant 3 should produce Small=417 Units.
